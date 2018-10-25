@@ -1,18 +1,6 @@
 import { Component } from '@angular/core';
 import { Title } from '@angular/platform-browser';
-const todos = [{
-  id: 1,
-  title: "记得回复静安寺",
-  done: true
-}, {
-  id: 2,
-  title: "蓝点似绯鲤",
-  done: false
-}, {
-  id: 3,
-  title: "发了四大皆空",
-  done: true
-}]
+const todos = []
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -23,8 +11,45 @@ export class AppComponent {
     id: number,
     title: string,
     done: boolean
-  }[] = todos
+  }[] = JSON.parse(window.localStorage.getItem('todos' || '[]'))
+  public visibility: string = 'all'
 
+  ngOnInit() {
+    // 初始化的时候手动调用一次
+    this.hashchangeHandler()
+
+    // 注意：这里要 bind this绑定
+    window.onhashchange = this.hashchangeHandler.bind(this)
+  }
+  ngDoCheck() {
+    window.localStorage.setItem('todos', JSON.stringify(this.todos))
+  }
+  get filterTodos() {
+    if (this.visibility === 'all') {
+      return this.todos
+    } else if (this.visibility === 'active') {
+      return this.todos.filter(t => !t.done)
+    } else if (this.visibility === 'completed') {
+      return this.todos.filter(t => t.done)
+    }
+  }
+  hashchangeHandler() {
+    // 当用户点击了锚点的时候，我们需要获取当前的锚点标识
+    // 然后动态的将根组件中的 visibility 设置为当前点击的锚点标识
+    const hash = window.location.hash.substr(1)
+
+    switch (hash) {
+      case '/':
+        this.visibility = 'all'
+        break;
+      case '/active':
+        this.visibility = 'active'
+        break;
+      case '/completed':
+        this.visibility = 'completed'
+        break;
+    }
+  }
   removeList(index) {
     this.todos.splice(index, 1)
   }
