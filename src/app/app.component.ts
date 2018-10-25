@@ -48,4 +48,10 @@ export class AppComponent {
     })
     e.target.value = ""
   }
+  get numbers() {
+    return this.todos.filter(t => !t.done).length
+  }
+  cleaeComplate() {
+    this.todos = this.todos.filter(t => !t.done)
+  }
 }
